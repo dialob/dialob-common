@@ -96,6 +96,40 @@ describe('Repository', () => {
     });
   });
 
+  describe('query.allDocs()', () => {
+    it('returns all documentids using couchdb rest api', () => {
+      fetchStub.returns(ajaxPromise);
+      sinon.stub(ajaxPromise,'then').returns(ajaxPromise);
+      repository.query.allDocs().then();
+      sinon.assert.calledThrice(ajaxPromise.then);
+      sinon.assert.calledOnce(fetch);
+      assert(fetchStub.calledWithMatch('http://localhost:5984/testing/_all_docs', {
+        method: 'GET',
+        credentials: 'same-origin',
+        headers: {
+          'Accept': 'application/json'
+        }
+      }));
+    });
+  });
+
+  describe('query.design("d").view("v")', () => {
+    it('call design view on couchdb rest api', () => {
+      fetchStub.returns(ajaxPromise);
+      sinon.stub(ajaxPromise,'then').returns(ajaxPromise);
+      repository.query.design("d").view("v").then();
+    //   sinon.assert.calledThrice(ajaxPromise.then);
+      sinon.assert.calledOnce(fetch);
+      assert(fetchStub.calledWithMatch('http://localhost:5984/testing/_design/d/_view/v', {
+        method: 'GET',
+        credentials: 'same-origin',
+        headers: {
+          'Accept': 'application/json'
+        }
+      }));
+    });
+  });
+
   describe('delete()', () => {
     it('DELETE couchdb document using rest api', () => {
       fetchStub.returns(ajaxPromise);
@@ -123,7 +157,7 @@ describe('Repository', () => {
         json : function () {}
       });
       sinon.stub(responseMock.object,'json').returns({ uuids: ['created-uuid'] });
-      responseMock.object.status = 200; 
+      responseMock.object.status = 200;
 
       var thenStub = sinon.stub(ajaxPromise,'then');
       thenStub.onCall(0).yields(responseMock.object).returns(ajaxPromise);
@@ -179,7 +213,7 @@ describe('Repository', () => {
         json : function () {}
       });
       sinon.stub(responseMock.object,'json').returns({ error: 'document not found' });
-      responseMock.object.status = 404; 
+      responseMock.object.status = 404;
 
       var catchStub = sinon.stub();
       var thenHandlerStub = sinon.stub();
@@ -212,7 +246,7 @@ describe('Repository', () => {
         json : function () {}
       });
       sinon.stub(responseMock.object,'json').returns({ uuids: ['new-document-uuid'] });
-      responseMock.object.status = 200; 
+      responseMock.object.status = 200;
 
       var thenStub = sinon.stub(ajaxPromise,'then');
       thenStub.onCall(0).yields(responseMock.object).returns(ajaxPromise);
@@ -226,7 +260,7 @@ describe('Repository', () => {
         json : function () {}
       });
       sinon.stub(responseMock2.object,'json').returns({ ok: true, id: 'new-document-uuid', rev: '1-new-document-uuid' });
-      responseMock2.object.status = 200; 
+      responseMock2.object.status = 200;
 
       thenStub.onCall(3).yields(responseMock2.object).returns(ajaxPromise);  // checkStatus
       thenStub.onCall(4).yields(responseMock2.object).returns(ajaxPromise);  // return response.json();

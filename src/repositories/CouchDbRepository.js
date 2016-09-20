@@ -65,17 +65,17 @@ export default class CouchDbRepository {
   }
 
   database(documentId) {
-    var url = () => this.server(this.databaseName).url() + (documentId ? '/' + documentId : '');
+    var url = path => this.server(this.databaseName).url() + (path ? '/' + path : '');
     var _rev;
     var parent = this;
     var doFetch = this.doFetch;
     var databaseApi = {
       url: url,
-      get: () => {
+      get: (path) => {
         var headers = Object.assign({
           'Accept': 'application/json'
         }, parent.csrfHeader);
-        return doFetch(url(), {
+        return doFetch(url(path || documentId), {
           method: 'GET',
           credentials: 'same-origin',
           headers: headers
@@ -91,7 +91,7 @@ export default class CouchDbRepository {
         var headers = Object.assign({
           'If-Match': _rev
         }, parent.csrfHeader);
-        return doFetch(url(), {
+        return doFetch(url(documentId), {
           method: 'DELETE',
           credentials: 'same-origin',
           headers: headers
@@ -102,7 +102,7 @@ export default class CouchDbRepository {
           'Content-Type': 'application/json; charset=UTF-8',
           'Accept': 'application/json'
         }, parent.csrfHeader);
-        return doFetch(url(), {
+        return doFetch(url(documentId), {
           method: 'PUT',
           credentials: 'same-origin',
           headers: headers,
@@ -155,7 +155,18 @@ export default class CouchDbRepository {
     return {
       all: () => {
         return this.database().get();
+      },
+      allDocs: () => {
+        return this.database().get('_all_docs');
+      },
+      design: design => {
+        return {
+          view: view => {
+            return this.database().get(`_design/${design}/_view/${view}`);
+		  }
+		};
       }
+
     };
   }
 
