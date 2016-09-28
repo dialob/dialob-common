@@ -26,126 +26,104 @@ describe('Repository', () => {
 
   var repository;
 
-  var ajaxPromise;
+  var jsonStub;
 
   beforeEach(() => {
-    ajaxPromise = {
-      done: () => {
-        return ajaxPromise;
-      },
-      fail: () => {
-        return ajaxPromise;
-      },
-      always: () => {
-        return ajaxPromise;
-      },
-      then: handler => {
-        return ajaxPromise;
-      },
-      catch: handler => {
-        return ajaxPromise;
-      }
-    };
-    fetchStub = sinon.stub().returns(ajaxPromise);
-
+    fetchStub = sinon.stub();
+    jsonStub = sinon.stub();
+    fetchStub.returns(Promise.resolve({
+      status: 200,
+      json: jsonStub
+    }));
     global.fetch = fetchStub;
     repository = new Repository('http://localhost:5984', 'testing', undefined, undefined, fetchStub);
-
   });
 
   describe('createUuid', () => {
     it('should request a new uuid from couchdb', () => {
-      repository.createUuid();
-      assert(fetchStub.calledWithMatch('http://localhost:5984/_uuids', {
-        method: 'GET',
-        credentials: 'same-origin',
-        headers: {
-          'Accept': 'application/json'
-        }
-      }));
+      return repository.createUuid().then(response => {
+        sinon.assert.calledWithMatch(fetchStub, 'http://localhost:5984/_uuids', {
+          method: 'GET',
+          credentials: 'same-origin',
+          headers: {
+            'Accept': 'application/json'
+          }
+        });
+      });
     });
 
     it('returns promise for result handling', () => {
-      repository.createUuid().then(
-        (data, textStatus, jqXHR) => {},
-        (jqXHR, textStatus, errorThrown) => {});
-      assert(fetchStub.calledWithMatch('http://localhost:5984/_uuids', {
-        method: 'GET',
-        credentials: 'same-origin',
-        headers: {
-          'Accept': 'application/json'
-        }
-      }));
+      return repository.createUuid().then(response => {
+        sinon.assert.calledWithMatch(fetchStub, 'http://localhost:5984/_uuids', {
+          method: 'GET',
+          credentials: 'same-origin',
+          headers: {
+            'Accept': 'application/json'
+          }
+        });
+      });
     });
   });
 
   describe('query.all()', () => {
     it('returns all documentids using couchdb rest api', () => {
-      fetchStub.returns(ajaxPromise);
-      sinon.stub(ajaxPromise,'then').returns(ajaxPromise);
-      repository.query.all().then();
-      sinon.assert.calledThrice(ajaxPromise.then);
-      sinon.assert.calledOnce(fetch);
-      assert(fetchStub.calledWithMatch('http://localhost:5984/testing', {
-        method: 'GET',
-        credentials: 'same-origin',
-        headers: {
-          'Accept': 'application/json'
-        }
-      }));
+      return repository.query.all().then(result => {
+        sinon.assert.calledOnce(fetchStub);
+        sinon.assert.calledWithMatch(fetchStub, 'http://localhost:5984/testing', {
+          method: 'GET',
+          credentials: 'same-origin',
+          headers: {
+            'Accept': 'application/json'
+          }
+        });
+      });
     });
   });
 
   describe('query.allDocs()', () => {
     it('returns all documentids using couchdb rest api', () => {
-      fetchStub.returns(ajaxPromise);
-      sinon.stub(ajaxPromise,'then').returns(ajaxPromise);
-      repository.query.allDocs().then();
-      sinon.assert.calledThrice(ajaxPromise.then);
-      sinon.assert.calledOnce(fetch);
-      assert(fetchStub.calledWithMatch('http://localhost:5984/testing/_all_docs', {
-        method: 'GET',
-        credentials: 'same-origin',
-        headers: {
-          'Accept': 'application/json'
-        }
-      }));
+      return repository.query.allDocs().then(result => {
+        sinon.assert.calledOnce(fetchStub);
+        sinon.assert.calledWithMatch(fetchStub, 'http://localhost:5984/testing/_all_docs', {
+          method: 'GET',
+          credentials: 'same-origin',
+          headers: {
+            'Accept': 'application/json'
+          }
+        });
+      });
     });
   });
 
   describe('query.design("d").view("v")', () => {
     it('call design view on couchdb rest api', () => {
-      fetchStub.returns(ajaxPromise);
-      sinon.stub(ajaxPromise,'then').returns(ajaxPromise);
-      repository.query.design("d").view("v").then();
-    //   sinon.assert.calledThrice(ajaxPromise.then);
-      sinon.assert.calledOnce(fetch);
-      assert(fetchStub.calledWithMatch('http://localhost:5984/testing/_design/d/_view/v', {
-        method: 'GET',
-        credentials: 'same-origin',
-        headers: {
-          'Accept': 'application/json'
-        }
-      }));
+      return repository.query.design("d").view("v").then(() => {
+        sinon.assert.calledOnce(fetchStub);
+        sinon.assert.calledWithMatch(fetchStub, 'http://localhost:5984/testing/_design/d/_view/v', {
+          method: 'GET',
+          credentials: 'same-origin',
+          headers: {
+            'Accept': 'application/json'
+          }
+        });
+      });
     });
   });
 
   describe('delete()', () => {
     it('DELETE couchdb document using rest api', () => {
-      fetchStub.returns(ajaxPromise);
-      sinon.stub(ajaxPromise,'then').returns(ajaxPromise);
-      repository.delete({
+      return repository.delete({
         _id: 'docId',
         _rev: 'docRev'
-      }).then();
-      sinon.assert.calledTwice(ajaxPromise.then);
-      assert(fetchStub.calledWithMatch('http://localhost:5984/testing/docId',{
-        method: 'DELETE',
-        credentials: 'same-origin',
-        headers: {
-          'If-Match': 'docRev'
-        }
-      }));
+      }).then(response => {
+        sinon.assert.calledWithMatch(fetchStub, 'http://localhost:5984/testing/docId',{
+          method: 'DELETE',
+          credentials: 'same-origin',
+          headers: {
+            'If-Match': 'docRev'
+          }
+        });
+      });
     });
   });
 
@@ -159,81 +137,70 @@ describe('Repository', () => {
       sinon.stub(responseMock.object,'json').returns({ uuids: ['created-uuid'] });
       responseMock.object.status = 200;
 
-      var thenStub = sinon.stub(ajaxPromise,'then');
-      thenStub.onCall(0).yields(responseMock.object).returns(ajaxPromise);
-      thenStub.onCall(1).yields(responseMock.object).returns(ajaxPromise);
-      thenStub.onCall(2).yields({ uuids: ['created-uuid'] }).returns(ajaxPromise);
-      fetchStub.returns(ajaxPromise);
+      fetchStub.returns(Promise.resolve(responseMock.object));
 
       // when
       return repository.getOrCreateId(null).then(
         result => {
-          assert(fetchStub.calledWithMatch('http://localhost:5984/_uuids',{
+          sinon.assert.calledWithMatch(fetchStub, 'http://localhost:5984/_uuids',{
             method: 'GET',
             credentials: 'same-origin',
             headers: {
               'Accept': 'application/json'
             }
-          }));
+          });
           expect(result[0]).to.equal('created-uuid');
         }
       );
     });
-    it('returns id of given document, if it exists', () => {
+    it('returns id of given document, if it exists', done => {
       // given
+      let thenStub = sinon.stub();
 
       // when
       repository.getOrCreateId({
         _id: 'existing-id',
         _rev: 'current-rev'
-      }).then(
-        (pair) => {
-          assert(pair[0]).toBe('existing-id');
-          assert(pair[1]).toBe('current-rev');
-        }
-      );
+      }).then(thenStub).then(() => {
+        sinon.assert.calledWithMatch(thenStub, ['existing-id','current-rev'])
+        done();
+      });
     });
   });
 
   describe('load', () => {
-    it('loads document using gived document id', () => {
-      repository.load('load-this');
-      assert(fetchStub.calledWithMatch('http://localhost:5984/testing/load-this', {
-        method: 'GET',
-        credentials: 'same-origin',
-        headers: {
-          'Accept': 'application/json'
-        }
-      }));
+    it('document using gived document id', () => {
+      repository.load('load-this').then(response => {
+        sinon.assert.calledWithMatch(fetchStub, 'http://localhost:5984/testing/load-this', {
+          method: 'GET',
+          credentials: 'same-origin',
+          headers: {
+            'Accept': 'application/json'
+          }
+        });
+      });
     });
 
 
-    it('needs to catch response on http code 404', () => {
+    it('needs to catch response on http code 404', done => {
       var responseMock = sinon.mock({
         json : function () {}
       });
-      sinon.stub(responseMock.object,'json').returns({ error: 'document not found' });
+      sinon.stub(responseMock.object,'json').returns({ error: 'document not found', status: 404 });
       responseMock.object.status = 404;
+      fetchStub.returns(Promise.resolve(responseMock.object));
 
-      var catchStub = sinon.stub();
-      var thenHandlerStub = sinon.stub();
-      var thenStub = sinon.stub(ajaxPromise,'then');
-      thenStub.onCall(0).yields(responseMock.object).returns(ajaxPromise);
-      var exception = null;
-      try {
-        repository.load('this-dont-exists');
-      } catch(e) {
-        exception = e;
-      }
-      assert(exception != null)
-      assert(exception.response != null)
-      assert(fetchStub.calledWithMatch('http://localhost:5984/testing/this-dont-exists', {
-        method: 'GET',
-        credentials: 'same-origin',
-        headers: {
-          'Accept': 'application/json'
-        }
-      }));
+      repository.load('this-dont-exists').catch(error => {
+        expect(error.status).to.equal(404);
+        expect(error.error).to.equal('document not found');
+        sinon.assert.calledWithMatch(fetchStub, 'http://localhost:5984/testing/this-dont-exists', {
+          method: 'GET',
+          credentials: 'same-origin',
+          headers: {
+            'Accept': 'application/json'
+          }
+        });
+      }).then(done);
     });
 
   });
@@ -242,29 +209,20 @@ describe('Repository', () => {
     it('creates an empty document, if not initial given', () => {
       // given
       // get uuid
-      var responseMock = sinon.mock({
-        json : function () {}
+      var getUidsResponseMock = sinon.mock({
+        json : () => {}
       });
-      sinon.stub(responseMock.object,'json').returns({ uuids: ['new-document-uuid'] });
-      responseMock.object.status = 200;
-
-      var thenStub = sinon.stub(ajaxPromise,'then');
-      thenStub.onCall(0).yields(responseMock.object).returns(ajaxPromise);
-      thenStub.onCall(1).yields(responseMock.object).returns(ajaxPromise);
-      thenStub.onCall(2).yields({ uuids: ['new-document-uuid'] }).returns(ajaxPromise);
-      fetchStub.returns(ajaxPromise);
-
+      sinon.stub(getUidsResponseMock.object,'json').returns({ uuids: ['new-document-uuid'] });
+      getUidsResponseMock.object.status = 200;
+      fetchStub.onCall(0).returns(Promise.resolve(getUidsResponseMock.object));
 
       // save
-      var responseMock2 = sinon.mock({
-        json : function () {}
+      var putDocumentResponseMock = sinon.mock({
+        json : () => {}
       });
-      sinon.stub(responseMock2.object,'json').returns({ ok: true, id: 'new-document-uuid', rev: '1-new-document-uuid' });
-      responseMock2.object.status = 200;
-
-      thenStub.onCall(3).yields(responseMock2.object).returns(ajaxPromise);  // checkStatus
-      thenStub.onCall(4).yields(responseMock2.object).returns(ajaxPromise);  // return response.json();
-      thenStub.onCall(5).yields({ ok: true, id: 'new-document-uuid', rev: '1-new-document-uuid' }).returns(ajaxPromise); //
+      sinon.stub(putDocumentResponseMock.object,'json').returns({ ok: true, id: 'new-document-uuid', rev: '1-new-document-uuid' });
+      putDocumentResponseMock.object.status = 200;
+      fetchStub.onCall(1).returns(Promise.resolve(putDocumentResponseMock.object));
 
       // when
       return repository.save().then(
@@ -272,14 +230,14 @@ describe('Repository', () => {
           // then
           assert.deepEqual({_id: 'new-document-uuid', _rev: '1-new-document-uuid'}, result);
 
-          assert(fetchStub.calledWithMatch('http://localhost:5984/_uuids', {
+          sinon.assert.calledWithMatch(fetchStub, 'http://localhost:5984/_uuids', {
             method: 'GET',
             credentials: 'same-origin',
             headers: {
               'Accept': 'application/json'
             }
-          }));
-          assert(fetchStub.calledWithMatch('http://localhost:5984/testing/new-document-uuid', {
+          });
+          sinon.assert.calledWithMatch(fetchStub, 'http://localhost:5984/testing/new-document-uuid', {
             method: 'PUT',
             credentials: 'same-origin',
             headers: {
@@ -287,9 +245,48 @@ describe('Repository', () => {
               'Content-Type': 'application/json; charset=UTF-8'
             },
             body: sinon.match.string
-          }));
+          });
       });
     });
   });
 
+  describe('database', () => {
+    describe('get', () => {
+      it('should GET document from database', () => {
+        return repository.database().get('docId').then(() => {
+          sinon.assert.calledWithMatch(fetchStub,'http://localhost:5984/testing/docId', {
+              method: 'GET',
+              credentials: 'same-origin',
+              headers: {
+                'Accept': 'application/json'
+              }
+          });
+        });
+      });
+    });
+    describe('put', () => {
+      it('should handle BAD REQUEST response', done => {
+        let badRequestResponse = sinon.mock({
+          json: () =>{}
+        });
+        sinon.stub(badRequestResponse.object,'json').returns({ ok: false, status: 400 });
+        badRequestResponse.object.status = 400;
+        fetchStub.onCall(0).returns(Promise.resolve(badRequestResponse.object));
+        fetchStub.returns(Promise.resolve(badRequestResponse.object));
+        repository.database('123').put({_id: '123',_rev:'-1'}).catch(error => {
+          sinon.assert.calledWithMatch(fetchStub,'http://localhost:5984/testing/123', {
+              method: 'PUT',
+              credentials: 'same-origin',
+              headers: {
+                'Content-Type': 'application/json; charset=UTF-8',
+                'Accept': 'application/json'
+              }
+          });
+          expect(error.ok).to.equal(false);
+          expect(error.status).to.equal(400);
+          done();
+        });
+      });
+    });
+  });
 });

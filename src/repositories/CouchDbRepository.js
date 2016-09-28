@@ -19,11 +19,10 @@ import Immutable from 'immutable';
 
 function checkStatus(response) {
   if (response.status >= 200 && response.status < 300) {
-    return response
+    return response;
   } else {
-    var error = new Error(response.statusText)
-    error.response = response
-    throw error
+    response = response.json();
+    return Promise.reject(response);
   }
 }
 
@@ -118,16 +117,12 @@ export default class CouchDbRepository {
     if (id) {
       return Promise.resolve([id, this.getRev(document)]); //eslint-disable-line no-undef
     }
-    return new Promise((resolve,reject) => { //eslint-disable-line no-undef
-      this.createUuid().then(
-        response => {
-          return response.json();
-        },
-        reject
-      ).then(json => {
-        resolve([json.uuids[0],null]);
-      });
-    });
+    return this.createUuid()
+      .then(
+        response => response.json()
+      ).then(
+        response => [response.uuids[0],null]
+      );
   }
 
   getId(document) {
@@ -163,8 +158,8 @@ export default class CouchDbRepository {
         return {
           view: view => {
             return this.database().get(`_design/${design}/_view/${view}`);
-		  }
-		};
+      }
+    };
       }
 
     };
@@ -205,31 +200,20 @@ export default class CouchDbRepository {
     return document;
   }
 
-
-  save(saveDocument) {
-    let document = saveDocument;
-    return new Promise((resolve,reject) => { //eslint-disable-line no-undef
-      this.getOrCreateId(document).then(
-        pair => {
-          document = document || this.newDocument(pair[0]);
-          document = this._updateDocumentRev(document,pair[0],pair[1]);
-          return this._save(document)
-            .then(
-              response => {
-                return response.json();
-              },
-              errors => reject(errors)
-            ).then(
-              revInfo => {
-                if (revInfo.ok) {
-                  return resolve({_id: revInfo.id, _rev: revInfo.rev});
-                }
-                return reject(revInfo);
-              }
-            );
-        },
-        errors => reject(errors));
-    });
+  save(document) {
+    return this.getOrCreateId(document)
+      .then(pair => {
+        document = document || this.newDocument(pair[0]);
+        document = this._updateDocumentRev(document, pair[0], pair[1]);
+        return this._save(document)
+          .then(response => response.json())
+          .then(revInfo => {
+            if (revInfo.ok) {
+              return { _id: revInfo.id, _rev: revInfo.rev };
+            }
+            return Promise.reject(revInfo);
+          });
+      });
   }
 
 }
