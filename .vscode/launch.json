@@ -5,7 +5,7 @@
             "name": "Launch",
             "type": "node",
             "request": "launch",
-            "program": "${workspaceRoot}/lib/index.js",
+            "program": "${workspaceRoot}/src/index.js",
             "stopOnEntry": false,
             "args": [],
             "cwd": "${workspaceRoot}",
@@ -17,7 +17,7 @@
             "env": {
                 "NODE_ENV": "development"
             },
-            "externalConsole": false,
+            "console": "internalConsole",
             "sourceMaps": false,
             "outDir": null
         },
@@ -47,14 +47,14 @@
             "type": "node",
             "request": "launch",
             "port": 5858,
-            "sourceMaps": false,
+            "sourceMaps": true,
             "outDir": null,
             "cwd": "${workspaceRoot}",
-			"program": "${workspaceRoot}/node_modules/mocha/bin/mocha",
+            "program": "${workspaceRoot}/node_modules/mocha/bin/_mocha",
             "runtimeArgs": [
                 "--nolazy"
             ],
-            "stopOnEntry": true,
+            "stopOnEntry": false,
             "args": ["--compilers","js:babel-register","--recursive","--no-timeouts","--require","${workspaceRoot}/test/setup.js"]
         }
 
