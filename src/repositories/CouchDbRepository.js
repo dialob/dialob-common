@@ -21,8 +21,7 @@ function checkStatus(response) {
   if (response.status >= 200 && response.status < 300) {
     return response;
   } else {
-    response = response.json();
-    return Promise.reject(response);
+    return response.json().then(response => Promise.reject(response));
   }
 }
 

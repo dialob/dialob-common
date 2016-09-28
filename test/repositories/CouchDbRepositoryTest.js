@@ -35,6 +35,7 @@ describe('Repository', () => {
       status: 200,
       json: jsonStub
     }));
+    jsonStub.returns(Promise.resolve({}));
     global.fetch = fetchStub;
     repository = new Repository('http://localhost:5984', 'testing', undefined, undefined, fetchStub);
   });
@@ -134,7 +135,7 @@ describe('Repository', () => {
       var responseMock = sinon.mock({
         json : function () {}
       });
-      sinon.stub(responseMock.object,'json').returns({ uuids: ['created-uuid'] });
+      sinon.stub(responseMock.object,'json').returns(Promise.resolve({ uuids: ['created-uuid'] }));
       responseMock.object.status = 200;
 
       fetchStub.returns(Promise.resolve(responseMock.object));
@@ -186,7 +187,7 @@ describe('Repository', () => {
       var responseMock = sinon.mock({
         json : function () {}
       });
-      sinon.stub(responseMock.object,'json').returns({ error: 'document not found', status: 404 });
+      sinon.stub(responseMock.object,'json').returns(Promise.resolve({ error: 'document not found', status: 404 }));
       responseMock.object.status = 404;
       fetchStub.returns(Promise.resolve(responseMock.object));
 
@@ -212,7 +213,7 @@ describe('Repository', () => {
       var getUidsResponseMock = sinon.mock({
         json : () => {}
       });
-      sinon.stub(getUidsResponseMock.object,'json').returns({ uuids: ['new-document-uuid'] });
+      sinon.stub(getUidsResponseMock.object,'json').returns(Promise.resolve({ uuids: ['new-document-uuid'] }));
       getUidsResponseMock.object.status = 200;
       fetchStub.onCall(0).returns(Promise.resolve(getUidsResponseMock.object));
 
@@ -220,7 +221,7 @@ describe('Repository', () => {
       var putDocumentResponseMock = sinon.mock({
         json : () => {}
       });
-      sinon.stub(putDocumentResponseMock.object,'json').returns({ ok: true, id: 'new-document-uuid', rev: '1-new-document-uuid' });
+      sinon.stub(putDocumentResponseMock.object,'json').returns(Promise.resolve({ ok: true, id: 'new-document-uuid', rev: '1-new-document-uuid' }));
       putDocumentResponseMock.object.status = 200;
       fetchStub.onCall(1).returns(Promise.resolve(putDocumentResponseMock.object));
 
@@ -269,7 +270,7 @@ describe('Repository', () => {
         let badRequestResponse = sinon.mock({
           json: () =>{}
         });
-        sinon.stub(badRequestResponse.object,'json').returns({ ok: false, status: 400 });
+        sinon.stub(badRequestResponse.object,'json').returns(Promise.resolve({ ok: false, status: 400 }));
         badRequestResponse.object.status = 400;
         fetchStub.onCall(0).returns(Promise.resolve(badRequestResponse.object));
         fetchStub.returns(Promise.resolve(badRequestResponse.object));
