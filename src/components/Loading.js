@@ -20,8 +20,8 @@ export default class Loading extends React.Component {
 
   render() {
     return (
-      <div className='ff-loading-indicator'>
-        <i className='fa fa-spinner fa-spin fa-5x'></i>
+      <div className={'ff-loading-indicator'}>
+        <i className={'fa fa-spinner fa-spin fa-5x'}></i>
       </div>
     );
   }

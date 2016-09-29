@@ -1,3 +1,4 @@
+/* eslint-env node, mocha */
 /**
  *  Copyright 2016 ReSys OÜ
  *
@@ -19,7 +20,6 @@ const Repository = require('../../src/repositories/CouchDbRepository').default;
 const sinon = require('sinon');
 const assert = require('chai').assert;
 const expect = require('chai').expect;
-
 
 describe('Repository', () => {
   var fetchStub;
@@ -47,7 +47,7 @@ describe('Repository', () => {
           method: 'GET',
           credentials: 'same-origin',
           headers: {
-            'Accept': 'application/json'
+            Accept: 'application/json'
           }
         });
       });
@@ -59,7 +59,7 @@ describe('Repository', () => {
           method: 'GET',
           credentials: 'same-origin',
           headers: {
-            'Accept': 'application/json'
+            Accept: 'application/json'
           }
         });
       });
@@ -74,7 +74,7 @@ describe('Repository', () => {
           method: 'GET',
           credentials: 'same-origin',
           headers: {
-            'Accept': 'application/json'
+            Accept: 'application/json'
           }
         });
       });
@@ -89,7 +89,7 @@ describe('Repository', () => {
           method: 'GET',
           credentials: 'same-origin',
           headers: {
-            'Accept': 'application/json'
+            Accept: 'application/json'
           }
         });
       });
@@ -104,7 +104,7 @@ describe('Repository', () => {
           method: 'GET',
           credentials: 'same-origin',
           headers: {
-            'Accept': 'application/json'
+            Accept: 'application/json'
           }
         });
       });
@@ -117,7 +117,7 @@ describe('Repository', () => {
         _id: 'docId',
         _rev: 'docRev'
       }).then(response => {
-        sinon.assert.calledWithMatch(fetchStub, 'http://localhost:5984/testing/docId',{
+        sinon.assert.calledWithMatch(fetchStub, 'http://localhost:5984/testing/docId', {
           method: 'DELETE',
           credentials: 'same-origin',
           headers: {
@@ -128,14 +128,14 @@ describe('Repository', () => {
     });
   });
 
- describe('getOrCreateId', () => {
-   it('calls createUuid to generate new id if document do not have it already.', () => {
+  describe('getOrCreateId', () => {
+    it('calls createUuid to generate new id if document do not have it already.', () => {
       // given
       // get uuid
       var responseMock = sinon.mock({
-        json : function () {}
+        json: () => {}
       });
-      sinon.stub(responseMock.object,'json').returns(Promise.resolve({ uuids: ['created-uuid'] }));
+      sinon.stub(responseMock.object, 'json').returns(Promise.resolve({uuids: ['created-uuid']}));
       responseMock.object.status = 200;
 
       fetchStub.returns(Promise.resolve(responseMock.object));
@@ -143,11 +143,11 @@ describe('Repository', () => {
       // when
       return repository.getOrCreateId(null).then(
         result => {
-          sinon.assert.calledWithMatch(fetchStub, 'http://localhost:5984/_uuids',{
+          sinon.assert.calledWithMatch(fetchStub, 'http://localhost:5984/_uuids', {
             method: 'GET',
             credentials: 'same-origin',
             headers: {
-              'Accept': 'application/json'
+              Accept: 'application/json'
             }
           });
           expect(result[0]).to.equal('created-uuid');
@@ -163,7 +163,7 @@ describe('Repository', () => {
         _id: 'existing-id',
         _rev: 'current-rev'
       }).then(thenStub).then(() => {
-        sinon.assert.calledWithMatch(thenStub, ['existing-id','current-rev'])
+        sinon.assert.calledWithMatch(thenStub, ['existing-id', 'current-rev']);
         done();
       });
     });
@@ -176,18 +176,17 @@ describe('Repository', () => {
           method: 'GET',
           credentials: 'same-origin',
           headers: {
-            'Accept': 'application/json'
+            Accept: 'application/json'
           }
         });
       });
     });
 
-
     it('needs to catch response on http code 404', done => {
       var responseMock = sinon.mock({
-        json : function () {}
+        json: () => {}
       });
-      sinon.stub(responseMock.object,'json').returns(Promise.resolve({ error: 'document not found', status: 404 }));
+      sinon.stub(responseMock.object, 'json').returns(Promise.resolve({error: 'document not found', status: 404}));
       responseMock.object.status = 404;
       fetchStub.returns(Promise.resolve(responseMock.object));
 
@@ -198,12 +197,11 @@ describe('Repository', () => {
           method: 'GET',
           credentials: 'same-origin',
           headers: {
-            'Accept': 'application/json'
+            Accept: 'application/json'
           }
         });
       }).then(done);
     });
-
   });
 
   describe('save', () => {
@@ -211,17 +209,17 @@ describe('Repository', () => {
       // given
       // get uuid
       var getUidsResponseMock = sinon.mock({
-        json : () => {}
+        json: () => {}
       });
-      sinon.stub(getUidsResponseMock.object,'json').returns(Promise.resolve({ uuids: ['new-document-uuid'] }));
+      sinon.stub(getUidsResponseMock.object, 'json').returns(Promise.resolve({uuids: ['new-document-uuid']}));
       getUidsResponseMock.object.status = 200;
       fetchStub.onCall(0).returns(Promise.resolve(getUidsResponseMock.object));
 
       // save
       var putDocumentResponseMock = sinon.mock({
-        json : () => {}
+        json: () => {}
       });
-      sinon.stub(putDocumentResponseMock.object,'json').returns(Promise.resolve({ ok: true, id: 'new-document-uuid', rev: '1-new-document-uuid' }));
+      sinon.stub(putDocumentResponseMock.object, 'json').returns(Promise.resolve({ok: true, id: 'new-document-uuid', rev: '1-new-document-uuid'}));
       putDocumentResponseMock.object.status = 200;
       fetchStub.onCall(1).returns(Promise.resolve(putDocumentResponseMock.object));
 
@@ -235,7 +233,7 @@ describe('Repository', () => {
             method: 'GET',
             credentials: 'same-origin',
             headers: {
-              'Accept': 'application/json'
+              Accept: 'application/json'
             }
           });
           sinon.assert.calledWithMatch(fetchStub, 'http://localhost:5984/testing/new-document-uuid', {
@@ -247,7 +245,8 @@ describe('Repository', () => {
             },
             body: sinon.match.string
           });
-      });
+        }
+      );
     });
   });
 
@@ -255,12 +254,12 @@ describe('Repository', () => {
     describe('get', () => {
       it('should GET document from database', () => {
         return repository.database().get('docId').then(() => {
-          sinon.assert.calledWithMatch(fetchStub,'http://localhost:5984/testing/docId', {
-              method: 'GET',
-              credentials: 'same-origin',
-              headers: {
-                'Accept': 'application/json'
-              }
+          sinon.assert.calledWithMatch(fetchStub, 'http://localhost:5984/testing/docId', {
+            method: 'GET',
+            credentials: 'same-origin',
+            headers: {
+              Accept: 'application/json'
+            }
           });
         });
       });
@@ -268,20 +267,20 @@ describe('Repository', () => {
     describe('put', () => {
       it('should handle BAD REQUEST response', done => {
         let badRequestResponse = sinon.mock({
-          json: () =>{}
+          json: () => {}
         });
-        sinon.stub(badRequestResponse.object,'json').returns(Promise.resolve({ ok: false, status: 400 }));
+        sinon.stub(badRequestResponse.object, 'json').returns(Promise.resolve({ok: false, status: 400}));
         badRequestResponse.object.status = 400;
         fetchStub.onCall(0).returns(Promise.resolve(badRequestResponse.object));
         fetchStub.returns(Promise.resolve(badRequestResponse.object));
-        repository.database('123').put({_id: '123',_rev:'-1'}).catch(error => {
-          sinon.assert.calledWithMatch(fetchStub,'http://localhost:5984/testing/123', {
-              method: 'PUT',
-              credentials: 'same-origin',
-              headers: {
-                'Content-Type': 'application/json; charset=UTF-8',
-                'Accept': 'application/json'
-              }
+        repository.database('123').put({_id: '123', _rev: '-1'}).catch(error => {
+          sinon.assert.calledWithMatch(fetchStub, 'http://localhost:5984/testing/123', {
+            method: 'PUT',
+            credentials: 'same-origin',
+            headers: {
+              'Content-Type': 'application/json; charset=UTF-8',
+              'Accept': 'application/json'
+            }
           });
           expect(error.ok).to.equal(false);
           expect(error.status).to.equal(400);

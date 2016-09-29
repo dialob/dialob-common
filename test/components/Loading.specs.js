@@ -1,3 +1,5 @@
+/* eslint-env node, mocha */
+/* eslint no-console: 0 */
 /**
  *  Copyright 2016 ReSys OÜ
  *
@@ -15,8 +17,8 @@
  */
 
 import expect from 'expect';
-import React, { PropTypes, Component } from 'react';
 import TestUtils from 'react-addons-test-utils';
+import React from 'react'; // eslint-disable-line no-unused-vars
 import {Loading} from '../../src/index';
 
 describe('Loading is exported component', () => {

@@ -1,3 +1,4 @@
+/* global document */
 /**
  *  Copyright 2016 ReSys OÜ
  *
@@ -14,7 +15,7 @@
  * limitations under the License.
  */
 
-import { jsdom } from 'jsdom';
+import {jsdom} from 'jsdom';
 
 global.document = jsdom('<!DOCTYPE html><html><body></body></html>');
 global.window = document.defaultView;

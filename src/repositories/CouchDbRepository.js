@@ -1,3 +1,4 @@
+/* global fetch */
 /**
  *  Copyright 2016 ReSys OÜ
  *
@@ -18,9 +19,8 @@ import Immutable from 'immutable';
 function checkStatus(response) {
   if (response.status >= 200 && response.status < 300) {
     return response;
-  } else {
-    return response.json().then(response => Promise.reject(response));
   }
+  return response.json().then(response => Promise.reject(response));
 }
 
 export default class CouchDbRepository {
@@ -48,7 +48,7 @@ export default class CouchDbRepository {
       url: url,
       get: () => {
         var headers = Object.assign({
-          'Accept': 'application/json'
+          Accept: 'application/json'
         }, parent.csrfHeader);
         return doFetch(url(), {
           method: 'GET',
@@ -61,15 +61,17 @@ export default class CouchDbRepository {
   }
 
   database(documentId) {
-    var url = path => this.server(this.databaseName).url() + (path ? '/' + path : '');
+    var url = path => {
+      return this.server(this.databaseName).url() + (path ? '/' + path : '');
+    };
     var _rev;
     var parent = this;
     var doFetch = this.doFetch;
     var databaseApi = {
       url: url,
-      get: (path) => {
+      get: path => {
         var headers = Object.assign({
-          'Accept': 'application/json'
+          Accept: 'application/json'
         }, parent.csrfHeader);
         return doFetch(url(path || documentId), {
           method: 'GET',
@@ -79,7 +81,7 @@ export default class CouchDbRepository {
         .then(checkStatus)
         .then(response => response.json());
       },
-      rev: (rev) => {
+      rev: rev => {
         _rev = rev;
         return databaseApi;
       },
@@ -93,7 +95,7 @@ export default class CouchDbRepository {
           headers: headers
         }).then(checkStatus);
       },
-      put: (document) => {
+      put: document => {
         var headers = Object.assign({
           'Content-Type': 'application/json; charset=UTF-8',
           'Accept': 'application/json'
@@ -112,13 +114,13 @@ export default class CouchDbRepository {
   getOrCreateId(document) {
     let id = this.getId(document);
     if (id) {
-      return Promise.resolve([id, this.getRev(document)]); //eslint-disable-line no-undef
+      return Promise.resolve([id, this.getRev(document)]); // eslint-disable-line no-undef
     }
     return this.createUuid()
       .then(
         response => response.json()
       ).then(
-        response => [response.uuids[0],null]
+        response => [response.uuids[0], null]
       );
   }
 
@@ -155,15 +157,16 @@ export default class CouchDbRepository {
         return {
           view: view => {
             return this.database().get(`_design/${design}/_view/${view}`);
+          }
+        };
       }
-    };
-      }
-
     };
   }
 
   delete(document) {
-    return this.database(this.getId(document)).rev(this.getRev(document)).delete();
+    return this.database(this.getId(document))
+      .rev(this.getRev(document))
+      .delete();
   }
 
   load(documentId) {
@@ -182,9 +185,9 @@ export default class CouchDbRepository {
   _updateDocumentRev(updateDocument, _id, _rev) {
     let document = updateDocument;
     if (Immutable.Map.isMap(document)) {
-      document = document.set('_id',_id);
+      document = document.set('_id', _id);
       if (_rev) {
-        document = document.set('_rev',_rev);
+        document = document.set('_rev', _rev);
       } else {
         document = document.delete('_rev');
       }
@@ -206,7 +209,7 @@ export default class CouchDbRepository {
           .then(response => response.json())
           .then(revInfo => {
             if (revInfo.ok) {
-              return { _id: revInfo.id, _rev: revInfo.rev };
+              return {_id: revInfo.id, _rev: revInfo.rev};
             }
             return Promise.reject(revInfo);
           });
