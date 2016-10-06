@@ -274,6 +274,17 @@ describe('Repository', () => {
           });
         });
       });
+      it('should GET document from database with query parameters and ignore nulls and undefined values', () => {
+        return repository.database().get('docId',{rev: 'a b c',undefinedValue: undefined, nullValue: null, total: 9}).then(() => {
+          sinon.assert.calledWithMatch(fetchStub, 'http://localhost:5984/testing/docId?rev=a%20b%20c', {
+            method: 'GET',
+            credentials: 'same-origin',
+            headers: {
+              Accept: 'application/json'
+            }
+          });
+        });
+      });
     });
     describe('put', () => {
       it('should handle BAD REQUEST response', done => {

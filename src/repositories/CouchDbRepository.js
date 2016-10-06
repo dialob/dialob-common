@@ -75,7 +75,7 @@ export default class CouchDbRepository {
         }, parent.csrfHeader);
         let queryString = "";
         if (params) {
-          queryString = "?" + Object.keys(params).map(key => `${encodeURIComponent(key)}=${encodeURIComponent(params[key])}`).join('&');
+          queryString = "?" + Object.keys(params).map(key => params[key] && `${encodeURIComponent(key)}=${encodeURIComponent(params[key])}`).filter(p => !!p).join('&');
         }
         return doFetch(url(path || documentId) + queryString, {
           method: 'GET',
