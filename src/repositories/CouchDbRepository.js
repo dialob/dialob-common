@@ -69,11 +69,15 @@ export default class CouchDbRepository {
     var doFetch = this.doFetch;
     var databaseApi = {
       url: url,
-      get: path => {
+      get: (path, params) => {
         var headers = Object.assign({
           Accept: 'application/json'
         }, parent.csrfHeader);
-        return doFetch(url(path || documentId), {
+        let queryString = "";
+        if (params) {
+          queryString = "?" + Object.keys(params).map(key => `${encodeURIComponent(key)}=${encodeURIComponent(params[key])}`).join('&');
+        }
+        return doFetch(url(path || documentId) + queryString, {
           method: 'GET',
           credentials: 'same-origin',
           headers: headers
@@ -150,13 +154,13 @@ export default class CouchDbRepository {
       all: () => {
         return this.database().get();
       },
-      allDocs: () => {
-        return this.database().get('_all_docs');
+      allDocs: params => {
+        return this.database().get('_all_docs', params);
       },
-      design: design => {
+      design: (design, params) => {
         return {
           view: view => {
-            return this.database().get(`_design/${design}/_view/${view}`);
+            return this.database().get(`_design/${design}/_view/${view}`, params);
           }
         };
       }

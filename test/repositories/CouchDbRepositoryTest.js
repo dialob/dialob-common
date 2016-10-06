@@ -263,6 +263,17 @@ describe('Repository', () => {
           });
         });
       });
+      it('should GET document from database with query parameters', () => {
+        return repository.database().get('docId',{rev: 'a b c',total: 9}).then(() => {
+          sinon.assert.calledWithMatch(fetchStub, 'http://localhost:5984/testing/docId?rev=a%20b%20c&total=9', {
+            method: 'GET',
+            credentials: 'same-origin',
+            headers: {
+              Accept: 'application/json'
+            }
+          });
+        });
+      });
     });
     describe('put', () => {
       it('should handle BAD REQUEST response', done => {
