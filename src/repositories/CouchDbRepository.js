@@ -157,9 +157,9 @@ export default class CouchDbRepository {
       allDocs: params => {
         return this.database().get('_all_docs', params);
       },
-      design: (design, params) => {
+      design: (design) => {
         return {
-          view: view => {
+          view: (view, params) => {
             return this.database().get(`_design/${design}/_view/${view}`, params);
           }
         };

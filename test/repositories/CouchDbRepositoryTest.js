@@ -109,6 +109,19 @@ describe('Repository', () => {
         });
       });
     });
+
+    it('call design view on couchdb rest api with query parameters', () => {
+      return repository.query.design("d").view("v", {q: "param1"}).then(() => {
+        sinon.assert.calledOnce(fetchStub);
+        sinon.assert.calledWithMatch(fetchStub, 'http://localhost:5984/testing/_design/d/_view/v?q=param1', {
+          method: 'GET',
+          credentials: 'same-origin',
+          headers: {
+            Accept: 'application/json'
+          }
+        });
+      });
+    });
   });
 
   describe('delete()', () => {
