@@ -1,12 +1,12 @@
 {
-  "name": "flexiform-common",
+  "name": "dialob-common",
   "version": "0.2.5",
   "description": "",
   "main": "lib/index.js",
   "scripts": {
     "build:lib": "babel src --out-dir lib",
-    "build:umd": "webpack lib/index.js dist/flexiform-common.js --config webpack.config.development.js",
-    "build:umd:min": "webpack lib/index.js dist/flexiform-common.min.js --config webpack.config.production.js",
+    "build:umd": "webpack lib/index.js dist/dialob-common.js --config webpack.config.development.js",
+    "build:umd:min": "webpack lib/index.js dist/dialob-common.min.js --config webpack.config.production.js",
     "build": "npm run build:lib && npm run build:umd && npm run build:umd:min",
     "clean": "rimraf lib dist coverage",
     "install": "npm run build:lib",
@@ -17,7 +17,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git@github.com:flexiform/flexiform-common.git"
+    "url": "git@github.com:dialob/dialob-common.git"
   },
   "author": "ReSys OÜ",
   "license": "Apache-2.0",

@@ -23,7 +23,7 @@ module.exports = {
     ]
   },
   output: {
-    library: 'FlexiForms',
+    library: 'DialobCommon',
     libraryTarget: 'umd'
   },
   resolve: {
