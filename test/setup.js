@@ -15,8 +15,10 @@
  * limitations under the License.
  */
 
-import {jsdom} from 'jsdom';
+const jsdom = require("jsdom");
+const { JSDOM } = jsdom;
 
-global.document = jsdom('<!DOCTYPE html><html><body></body></html>');
-global.window = document.defaultView;
-global.navigator = global.window.navigator;
+global.window = new JSDOM('<!DOCTYPE html><html><body></body></html>').window;
+global.document = window.document;
+global.navigator = window.navigator;
+global.HTMLElement = window.HTMLElement;

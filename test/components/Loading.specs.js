@@ -17,14 +17,12 @@
  */
 
 import expect from 'expect';
-import TestUtils from 'react-addons-test-utils';
 import React from 'react'; // eslint-disable-line no-unused-vars
+import TestUtils from 'react-dom/test-utils';
 import {Loading} from '../../src/index';
 
 describe('Loading is exported component', () => {
   it('should render as react component without exceptions', () => {
-    expect(() => TestUtils.renderIntoDocument(
-      <Loading />
-    )).toNotThrow();
+    expect(() => TestUtils.renderIntoDocument(<Loading />)).not.toThrow();
   });
 });
