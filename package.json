@@ -34,7 +34,7 @@
     "eslint-plugin-react": "^7.9.1",
     "expect": "^23.1.0",
     "jsdom": "^11.11.0",
-    "mocha": "^5.2.0",
+    "mocha": "^10.1.0",
     "react": "^16.4.0",
     "react-dom": "^16.4.0",
     "react-redux": "^5.0.7",
